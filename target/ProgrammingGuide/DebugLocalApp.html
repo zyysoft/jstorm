@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>JStorm Documentation : How to debug local topology?</title>
+    <link rel="shortcut icon" href="/img/favicon.png" type="image/x-icon">
+    <link rel="icon" href="/img/favicon.png" type="image/x-icon">
+
+    <!-- Bootstrap -->
+    <link href="//cdn.bootcss.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/jstorm.css">
+    <link rel="stylesheet" href="/css/syntax.css">
+    <link rel="stylesheet" href="/css/codetabs.css">
+    
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    
+    <!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<!--
+
+
+
+
+-->
+    <!-- Top navbar. -->
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <!-- The logo. -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <div class="navbar-logo">
+            <a href="/"><img alt="jstorm" src="/img/jstorm-logo.png"></a>
+          </div>
+        </div><!-- /.navbar-header -->
+
+        <!-- The navigation links. -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            
+            <!-- Downloads -->
+            <li class="hidden-sm "><a href="/Downloads.html">Downloads</a></li>
+
+            <!-- Performance -->
+            <li class="hidden-sm "><a href="/Performance">Performance</a></li>
+
+            <!-- QuickStart -->
+            <li class="dropdown">
+              <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">QuickStart <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                
+                
+                <li class=""><a href="/QuickStart/BasicConception.html">Basic Conception</a></li>
+                
+                <li class=""><a href="/QuickStart/Example.html">Example</a></li>
+                
+                <li class=""><a href="/QuickStart/Deploy/index.html">Deploy</a></li>
+                
+                <li class=""><a href="/QuickStart/Upgrade/index.html">Upgrade</a></li>
+                
+                <li class=""><a href="/QuickStart/UpgradeFromStorm.html">Migrate from Apache Storm</a></li>
+                
+                <li class=""><a href="/QuickStart/Compile.html">Compile JStorm</a></li>
+                
+              </ul>
+            </li>
+
+            <!-- ProgrammingGuide -->
+            <li class="dropdown active">
+              <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">ProgrammingGuide <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                  
+                  
+                  <li class="active"><a href="/ProgrammingGuide/DebugLocalApp.html">Local Debug</a></li>
+                  
+                  <li class=""><a href="/ProgrammingGuide/NewWindow.html">NewWindow</a></li>
+                  
+                  <li class=""><a href="/ProgrammingGuide/StreamSplitJoin.html">Split-Merge-Stream</a></li>
+                  
+                  <li class=""><a href="/ProgrammingGuide/Transaction.html">Transaction</a></li>
+                  
+                  <li class=""><a href="/ProgrammingGuide/Trident.html">Trident</a></li>
+                  
+                  <li class=""><a href="/ProgrammingGuide/AdvancedUsage/index.html">Advanced Usage</a></li>
+                  
+              </ul>
+            </li>
+
+            <!-- Maintenance -->
+            <li class="dropdown">
+              <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Maintenance <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                  
+                  
+                  <li class=""><a href="/Maintenance/Configuration.html">Configuration</a></li>
+                  
+                  <li class=""><a href="/Maintenance/ConfigurationAutomacticSync.html">Automatically Sync Configuration</a></li>
+                  
+                  <li class=""><a href="/Maintenance/Isolation.html">Resource Isolation</a></li>
+                  
+                  <li class=""><a href="/Maintenance/JStormMetrics.html">JStorm Metrics</a></li>
+                  
+                  <li class=""><a href="/Maintenance/HealthCheck.html">Supervisor Health Check</a></li>
+                  
+                  <li class=""><a href="/Maintenance/JStorm-on-Yarn.html">JStorm-on-Yarn</a></li>
+                  
+                  <li class=""><a href="/Maintenance/ClusterHA.html">Cluster HA</a></li>
+                  
+                  <li class=""><a href="/Maintenance/GrayUpgrade.html">Gray Upgrade</a></li>
+                  
+                  <li class=""><a href="/Maintenance/SupervisorWorker.html">Supervisor-Generate-Workers</a></li>
+                  
+                  <li class=""><a href="/Maintenance/DynamicAdjustLog.html">Dynamic Adjust Log</a></li>
+                  
+              </ul>
+            </li>
+
+            <!-- FAQ -->
+            <li class="hidden-sm "><a href="/FAQ/">FAQ</a></li>
+
+            <!-- Community -->
+            <li class="dropdown">
+              <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Community <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                  
+                  
+                  <li class=""><a href="/Community/Email.html">Email List</a></li>
+                  
+                  <li class=""><a href="/Community/Committers.html">Committer List</a></li>
+                  
+                  <li class=""><a href="/Community/Events-Meetups.html">Events and Meetups</a></li>
+                  
+                  <li class=""><a href="/Community/Issues.html">Track issues</a></li>
+                  
+                  <li class=""><a href="/Community/JStormUsers.html">JStorm User List</a></li>
+                  
+              </ul>
+            </li>
+
+
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li class="dropdown">
+              <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Language <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                  <li class=""><a href="/index.html">English</a></li>
+                  <li class=""><a href="/index_cn.html">中文</a></li>
+
+              </ul>
+            </li>
+          </ul>          
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container -->
+    </nav>
+
+
+    
+
+    <!-- Main content. -->
+    <div class="container">
+      
+      <!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<div class="row">
+
+  
+  
+  <div class="col-md-8 col-md-offset-2 text">
+    <h1>How to debug local topology?</h1>
+	<ul id="markdown-toc">
+  <li><a href="#how-to-debug-a-jstorm-topology-locally" id="markdown-toc-how-to-debug-a-jstorm-topology-locally">How to debug a JStorm topology locally</a>    <ul>
+      <li><a href="#use-localcluster-in-your-code" id="markdown-toc-use-localcluster-in-your-code">Use LocalCluster in your code</a></li>
+      <li><a href="#modify-pomxml" id="markdown-toc-modify-pomxml">Modify pom.xml</a></li>
+      <li><a href="#run-main-class" id="markdown-toc-run-main-class">Run main class。</a></li>
+      <li><a href="#run-sequence-split-merge-examples" id="markdown-toc-run-sequence-split-merge-examples">Run sequence-split-merge examples</a></li>
+      <li><a href="#limitation" id="markdown-toc-limitation">Limitation</a></li>
+      <li><a href="#faq" id="markdown-toc-faq">FAQ</a>        <ul>
+          <li><a href="#no-output-in-console" id="markdown-toc-no-output-in-console">No output in console</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h1 id="how-to-debug-a-jstorm-topology-locally">How to debug a JStorm topology locally</h1>
+
+<p>JStorm has two modes: local and distributed. Local mode is very helpful for developing and debugging your topologies.</p>
+
+<p>This document briefs how to debug locally without installing JStorm on your computer.</p>
+
+<h2 id="use-localcluster-in-your-code">Use LocalCluster in your code</h2>
+
+<pre><code>```java
+import backtype.storm.LocalCluster;
+
+LocalCluster cluster = new LocalCluster();
+
+// set spout/bolt max parallelism
+conf.put(Config.TOPOLOGY_MAX_TASK_PARALLELISM, 1);
+
+// submit a local topology
+cluster.submitTopology("SequenceTest", conf, builder.createTopology());
+
+// wait for 1 min before killing the topology and local cluster, you can change this value accordingly
+Thread.sleep(60000);		
+		
+// kill the topology
+cluster.killTopology("SequenceTest");
+
+// shutdown local cluster
+cluster.shutdown();
+```
+
+A LocalCluster puts nimbus, supervisor and worker into a single process. You can use `submitTopology` to 
+submit topologies just like `StormSubmitter`.
+
+You can also call `killTopology`, `active`, `deactive`, `rebalance`, etc. to perform other operations.
+</code></pre>
+
+<h2 id="modify-pomxml">Modify pom.xml</h2>
+
+<pre><code>Let's say you are using JStorm 2.2.1
+
+```xml
+&lt;dependency&gt;
+  &lt;groupId&gt;com.alibaba.jstorm&lt;/groupId&gt;
+  &lt;artifactId&gt;jstorm-core&lt;/artifactId&gt;
+  &lt;version&gt;2.2.1&lt;/version&gt;
+  &lt;!-- keep jstorm out of the jar-with-dependencies --&gt;
+  &lt;!-- &lt;scope&gt;provided&lt;/scope&gt; --&gt;
+&lt;/dependency&gt;
+```
+
+`&lt;scope&gt;provided&lt;/scope&gt;` is unset, but **remember to change it back when submitting to a distributed cluster!** 
+otherwise you'll get errors complaining about multiple `defaults.yaml`
+</code></pre>
+
+<h2 id="run-main-class">Run main class。</h2>
+
+<pre><code>Below is a snapshot of local debug
+</code></pre>
+
+<p><img src="/img/programguide/localdebug.jpg" alt="image" /></p>
+
+<pre><code>For better code organization, it's recommended to separate local running and distributed running code into two 
+ methods, and put running mode into your conf. 
+ 
+Please refer to [SequenceTopology](https://github.com/alibaba/jstorm/blob/master/example/sequence-split-merge/src/main/java/com/alipay/dw/jstorm/example/sequence/SequenceTopology.java)
+</code></pre>
+
+<h2 id="run-sequence-split-merge-examples">Run sequence-split-merge examples</h2>
+
+<p>example/sequence-split-merge in JStorm source code comes with plenty of examples, unfortunately, 
+  due to maven-shade-plugin in jstorm-core, if you want to run the examples locally, a few modification
+  is required.</p>
+
+<p>Take the simplest <code>SequenceTopology</code> as an example, you’ll find errors when building with javac or within your IDE.
+ Please change as follows:</p>
+
+<p>In <code>TotalCount</code> class, comment <code>import com.alibaba.jstorm.metrics.Gauge;</code> and import classes in codahale dependency, i.e., 
+ <code>import com.codahale.metrics.Gauge;</code></p>
+
+<p>In <code>PairSerializer</code> and <code>TradeCustomerSerializer</code>, comment packages starting with <code>com.alibaba.jstorm</code>,
+ and uncomment classes starting with <code>com.esotericsoftware</code> below.</p>
+
+<p>Now you should be fine to run <code>SequenceTopology</code>.</p>
+
+<p>Finally, if you have a better solution for this, please don’t hesitate to issue a PR.</p>
+
+<h2 id="limitation">Limitation</h2>
+
+<p>Local debug is mainly used to test application logic, so there’re limitations like user defined classloader is not 
+ supported.</p>
+
+<p>Moreover, pay attention to your log4j dependency in your application, if a <code>log4j.properties</code> is within your
+ dependency or application resource, it might overlap log4j conf of JStorm, resulting in nil output in your console.</p>
+
+<h2 id="faq">FAQ</h2>
+
+<h3 id="no-output-in-console">No output in console</h3>
+
+<p>A few reasons may cause this problem</p>
+
+<pre><code>1. If your application depends slf4j-log4j12, this will conflict with log4j-over-slf4j(introduced by jstorm-core),
+please exclude slf4j-log4j12
+
+2. Make sure your logs are printed using slf4j-api, i.e., `LoggerFactory` rather than `Logger`.
+</code></pre>
+
+  <div class="footer">
+      Google Groups: <a target="_blank" href="https://groups.google.com/forum/#!forum/jstorm-user">jstorm-user</a>, QQ Groups: 228374502
+      </p>
+      Caught a mistake or want to contribute to the documentation? 
+      <a href="https://github.com/alibaba/jstorm/edit/master/docs/jstorm-doc/ProgrammingGuide/DebugLocalApp.md" target="_blank">
+        Edit this page on Github!
+      </a>
+  </div>
+  
+
+  
+</div>
+
+    </div><!-- /.container -->
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="//cdn.bootcss.com/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="//cdn.bootcss.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script src="//cdn.bootcss.com/anchor-js/3.1.0/anchor.min.js"></script>
+    <script src="/js/jstorm.js"></script>
+
+    <!-- Google Analytics -->
+    <!-- script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-52545728-1', 'auto');
+      ga('send', 'pageview');
+    </script -->
+
+    <!-- Baidu Analytics -->
+    <script>
+      var _hmt = _hmt || [];
+      (function() {
+        var hm = document.createElement("script");
+        hm.src = "//hm.baidu.com/hm.js?835985ad7943d8c24bc3c1f155b7d4a2";
+        var s = document.getElementsByTagName("script")[0]; 
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+
+
+    <!-- Disqus -->
+    <!--
+     -->
+  </body>
+</html>
