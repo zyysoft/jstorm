@@ -18,29 +18,32 @@
 package com.alibaba.jstorm.hdfs.bolt;
 
 
-import backtype.storm.task.OutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.tuple.Tuple;
-import org.apache.avro.Schema;
-import org.apache.avro.file.DataFileWriter;
-import org.apache.avro.io.DatumWriter;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.generic.GenericDatumWriter;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.client.HdfsDataOutputStream;
-
-import com.alibaba.jstorm.hdfs.bolt.format.FileNameFormat;
-import com.alibaba.jstorm.hdfs.bolt.rotation.FileRotationPolicy;
-import com.alibaba.jstorm.hdfs.bolt.sync.SyncPolicy;
-import com.alibaba.jstorm.hdfs.common.rotation.RotationAction;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.util.EnumSet;
 import java.util.Map;
+
+import org.apache.avro.Schema;
+import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.generic.GenericDatumWriter;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.io.DatumWriter;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hdfs.client.HdfsDataOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.alibaba.jstorm.hdfs.bolt.format.FileNameFormat;
+import com.alibaba.jstorm.hdfs.bolt.parse.TupleParse;
+import com.alibaba.jstorm.hdfs.bolt.rotation.FileRotationPolicy;
+import com.alibaba.jstorm.hdfs.bolt.sync.SyncPolicy;
+import com.alibaba.jstorm.hdfs.common.rotation.RotationAction;
+
+import backtype.storm.task.OutputCollector;
+import backtype.storm.task.TopologyContext;
+import backtype.storm.tuple.Tuple;
 
 public class AvroGenericRecordBolt extends AbstractHdfsBolt{
 
@@ -91,6 +94,11 @@ public class AvroGenericRecordBolt extends AbstractHdfsBolt{
         this.tickTupleInterval = interval;
         return this;
     }
+    
+    public AvroGenericRecordBolt withTupleParse(TupleParse  tupleParse) {
+    		this.tupleParse=tupleParse;
+    		return this;
+    }
 
     @Override
     protected void doPrepare(Map conf, TopologyContext topologyContext, OutputCollector collector) throws IOException {
@@ -102,15 +110,16 @@ public class AvroGenericRecordBolt extends AbstractHdfsBolt{
 
     @Override
     protected void writeTuple(Tuple tuple) throws IOException {
-        GenericRecord avroRecord = (GenericRecord) tuple.getValue(0);
+    		//kafka里的是字符串，转换成avro
+        //GenericRecord avroRecord = (GenericRecord) tuple.getValue(0);
+    		GenericRecord avroRecord=tupleParse.tupleToRecode(tuple,this.schema);
         avroWriter.append(avroRecord);
         offset = this.out.getPos();
     }
-
+    
     @Override
     protected void syncTuples() throws IOException {
         avroWriter.flush();
-
         LOG.debug("Attempting to sync all data to filesystem");
         if (this.out instanceof HdfsDataOutputStream) {
             ((HdfsDataOutputStream) this.out).hsync(EnumSet.of(HdfsDataOutputStream.SyncFlag.UPDATE_LENGTH));

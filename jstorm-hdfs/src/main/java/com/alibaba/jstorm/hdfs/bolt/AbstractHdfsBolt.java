@@ -23,10 +23,13 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.utils.TupleUtils;
+
+import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import com.alibaba.jstorm.hdfs.bolt.format.FileNameFormat;
+import com.alibaba.jstorm.hdfs.bolt.parse.TupleParse;
 import com.alibaba.jstorm.hdfs.bolt.rotation.FileRotationPolicy;
 import com.alibaba.jstorm.hdfs.bolt.rotation.TimedRotationPolicy;
 import com.alibaba.jstorm.hdfs.bolt.sync.SyncPolicy;
@@ -67,7 +70,9 @@ public abstract class AbstractHdfsBolt extends BaseRichBolt {
     protected long offset = 0;
     protected Integer fileRetryCount = DEFAULT_RETRY_COUNT;
     protected Integer tickTupleInterval = DEFAULT_TICK_TUPLE_INTERVAL_SECS;
-
+    
+    protected TupleParse tupleParse;
+    
     protected transient Configuration hdfsConfig;
 
     protected void rotateOutputFile() throws IOException {
@@ -245,5 +250,4 @@ public abstract class AbstractHdfsBolt extends BaseRichBolt {
     abstract protected Path createOutputFile() throws IOException;
 
     abstract protected void doPrepare(Map conf, TopologyContext topologyContext, OutputCollector collector) throws IOException;
-
 }
