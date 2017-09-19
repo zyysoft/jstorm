@@ -1,0 +1,1 @@
+mvn deploy:deploy-file -DgroupId=com.alibaba.jstorm -DartifactId=jstorm-hdfs -Dversion=2.4.0 -Dfile=target/jstorm-hdfs-2.4.0.jar -Durl=http://dev-bi-cdh07:8081/repository/bi-nexus/ -DrepositoryId=bi-nexus
