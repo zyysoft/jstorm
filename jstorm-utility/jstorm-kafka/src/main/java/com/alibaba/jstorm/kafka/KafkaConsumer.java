@@ -16,6 +16,7 @@ import kafka.api.FetchRequest;
 import kafka.api.FetchRequestBuilder;
 import kafka.api.PartitionOffsetRequestInfo;
 import kafka.cluster.Broker;
+import kafka.cluster.BrokerEndPoint;
 import kafka.common.ErrorMapping;
 import kafka.common.KafkaException;
 import kafka.common.TopicAndPartition;
@@ -44,7 +45,8 @@ public class KafkaConsumer {
     private KafkaSpoutConfig config;
     private LinkedList<Host> brokerList;
     private int brokerIndex;
-    private Broker leaderBroker;
+    //private Broker leaderBroker;
+    private BrokerEndPoint leaderBroker;
 
     public KafkaConsumer(KafkaSpoutConfig config) {
         this.config = config;
@@ -111,6 +113,7 @@ public class KafkaConsumer {
                 consumer = null;
                 return null;
             }
+            //leaderBroker = metadata.leader();
             leaderBroker = metadata.leader();
             consumer = new SimpleConsumer(leaderBroker.host(), leaderBroker.port(), config.socketTimeoutMs, config.socketReceiveBufferBytes,
                     config.clientId);
@@ -230,12 +233,20 @@ public class KafkaConsumer {
         this.status = status;
     }
 
-    public Broker getLeaderBroker() {
-        return leaderBroker;
-    }
+	public BrokerEndPoint getLeaderBroker() {
+		return leaderBroker;
+	}
 
-    public void setLeaderBroker(Broker leaderBroker) {
-        this.leaderBroker = leaderBroker;
-    }
+	public void setLeaderBroker(BrokerEndPoint leaderBroker) {
+		this.leaderBroker = leaderBroker;
+	}
+
+//    public Broker getLeaderBroker() {
+//        return leaderBroker;
+//    }
+//
+//    public void setLeaderBroker(Broker leaderBroker) {
+//        this.leaderBroker = leaderBroker;
+//    }
 
 }
