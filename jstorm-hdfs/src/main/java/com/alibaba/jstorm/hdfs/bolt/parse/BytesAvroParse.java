@@ -48,8 +48,9 @@ public class BytesAvroParse implements TupleParse {
 				String key = (String) it.next();
 				if(fields.contains(key)) {
 					avroRecord.put(key, jsonObject.get(key));
+					LOG.info("{}:{}",key,jsonObject.get(key));
 				}else {
-					LOG.info("{} not in schema,{}", key,messages);
+					LOG.debug("{} not in schema,{}", key,messages);
 				}
 			}
 		} catch (UnsupportedEncodingException e) {

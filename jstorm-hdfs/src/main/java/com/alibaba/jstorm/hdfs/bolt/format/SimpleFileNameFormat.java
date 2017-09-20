@@ -36,6 +36,7 @@ public class SimpleFileNameFormat implements FileNameFormat {
     private String path = "/storm";
     private String name = "$TIME.$NUM.txt";
     private String timeFormat = "yyyyMMddHHmmss";
+    private String dateFormat = "yyyyMMdd";
 
     @Override
     public String getName(long rotation, long timeStamp) {
@@ -49,10 +50,16 @@ public class SimpleFileNameFormat implements FileNameFormat {
                 .replace("$TASK", String.valueOf(taskId));
         return ret;
     }
-
+    
+    /**
+     * path支持变量
+     * 
+     */
     @Override
     public String getPath() {
-        return path;
+    	 	SimpleDateFormat df = new SimpleDateFormat(dateFormat);
+        //return path;
+    	 	return path.replace("$TIME", df.format(new Date()));
     }
 
     @SuppressWarnings("unchecked")
