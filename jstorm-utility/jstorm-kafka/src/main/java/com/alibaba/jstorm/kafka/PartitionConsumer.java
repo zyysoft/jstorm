@@ -125,7 +125,7 @@ public class PartitionConsumer {
             msgs = consumer.fetchMessages(partition, emittingOffset + 1);
             
             if (msgs == null) {
-                LOG.error("fetch null message from offset {}", emittingOffset);
+                LOG.debug("fetch null message from offset {}", emittingOffset);
                 return;
             }
             
@@ -138,7 +138,7 @@ public class PartitionConsumer {
                 LOG.debug("fillmessage fetched a message:{}, offset:{}", msg.message().toString(), msg.offset());
             }
             long end = System.currentTimeMillis();
-            LOG.info("fetch message from partition:"+partition+", offset:" + emittingOffset+", size:"+msgs.sizeInBytes()+", count:"+count +", time:"+(end-start));
+            LOG.debug("fetch message from partition:"+partition+", offset:" + emittingOffset+", size:"+msgs.sizeInBytes()+", count:"+count +", time:"+(end-start));
         } catch (Exception e) {
             e.printStackTrace();
             LOG.error(e.getMessage(),e);
