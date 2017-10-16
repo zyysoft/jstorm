@@ -99,7 +99,11 @@ public class PartitionConsumer {
 
             if (tups != null) {
                 for (List<Object> tuple : tups) {
-                    LOG.debug("emit message {}", new String(Utils.toByteArray(toEmitMsg.message().payload())));
+                    if(LOG.isDebugEnabled()){
+                        StringBuilder sb =new StringBuilder();
+                        sb.append(Utils.toByteArray(toEmitMsg.message().payload()));
+                        LOG.debug("emit message {}", new String(Utils.toByteArray(toEmitMsg.message().payload())));
+                    }
                     collector.emit(tuple, new KafkaMessageId(partition, toEmitMsg.offset()));
                 }
                 if(count>=config.batchSendCount) {
