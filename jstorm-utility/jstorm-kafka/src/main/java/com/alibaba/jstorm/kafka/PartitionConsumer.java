@@ -101,7 +101,7 @@ public class PartitionConsumer {
                 for (List<Object> tuple : tups) {
                     if(LOG.isDebugEnabled()){
                         StringBuilder sb =new StringBuilder();
-                        sb.append(Utils.toByteArray(toEmitMsg.message().payload()));
+                        sb.append(toEmitMsg.message().payload());
                         LOG.debug("emit message {}", new String(Utils.toByteArray(toEmitMsg.message().payload())));
                     }
                     collector.emit(tuple, new KafkaMessageId(partition, toEmitMsg.offset()));
