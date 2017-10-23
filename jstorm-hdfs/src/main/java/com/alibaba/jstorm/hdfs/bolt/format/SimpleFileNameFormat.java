@@ -57,9 +57,9 @@ public class SimpleFileNameFormat implements FileNameFormat {
      */
     @Override
     public String getPath() {
-    	 	SimpleDateFormat df = new SimpleDateFormat(dateFormat);
-        //return path;
-    	 	return path.replace("$TIME", df.format(new Date()));
+    	 SimpleDateFormat df = new SimpleDateFormat(dateFormat);
+         //return path;
+    	 return path.replace("$DATE", df.format(new Date()));
     }
 
     @SuppressWarnings("unchecked")
