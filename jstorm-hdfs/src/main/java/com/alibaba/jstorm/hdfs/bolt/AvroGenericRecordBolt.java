@@ -112,7 +112,13 @@ public class AvroGenericRecordBolt extends AbstractHdfsBolt{
     protected void writeTuple(Tuple tuple) throws IOException {
     		//kafka里的是字符串，转换成avro
         //GenericRecord avroRecord = (GenericRecord) tuple.getValue(0);
-    		GenericRecord avroRecord=tupleParse.tupleToRecode(tuple,this.schema);
+        GenericRecord avroRecord = null;
+        try{
+            avroRecord=tupleParse.tupleToRecode(tuple,this.schema);
+        }catch (Exception e){
+            avroRecord.put("match",false);
+        }
+
         avroWriter.append(avroRecord);
         offset = this.out.getPos();
     }
