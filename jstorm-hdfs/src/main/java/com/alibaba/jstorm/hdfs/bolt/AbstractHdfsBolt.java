@@ -126,6 +126,7 @@ public abstract class AbstractHdfsBolt extends BaseRichBolt {
             throw new RuntimeException("Error preparing HdfsBolt: " + e.getMessage(), e);
         }
 
+        //定时分隔机制
         if(this.rotationPolicy instanceof TimedRotationPolicy){
             long interval = ((TimedRotationPolicy)this.rotationPolicy).getInterval();
             this.rotationTimer = new Timer(true);
@@ -149,7 +150,7 @@ public abstract class AbstractHdfsBolt extends BaseRichBolt {
         synchronized (this.writeLock) {
             boolean forceSync = false;
             if (TupleUtils.isTick(tuple)) {
-                LOG.debug("TICK! forcing a file system flush");
+                LOG.info("TICK! forcing a file system flush");
                 this.collector.ack(tuple);
                 forceSync = true;
             } else {
@@ -201,10 +202,12 @@ public abstract class AbstractHdfsBolt extends BaseRichBolt {
                 }
             }
 
+            //如果是定时机制，永远是false
             if(this.rotationPolicy.mark(tuple, this.offset)) {
                 try {
                     rotateOutputFile();
                     this.rotationPolicy.reset();
+                    //重置后是否会出问题？之前写入的数据没有了？
                     this.offset = 0;
                 } catch (IOException e) {
                     this.collector.reportError(e);

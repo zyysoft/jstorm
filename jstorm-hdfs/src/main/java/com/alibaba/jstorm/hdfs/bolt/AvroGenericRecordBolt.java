@@ -126,7 +126,7 @@ public class AvroGenericRecordBolt extends AbstractHdfsBolt{
     @Override
     protected void syncTuples() throws IOException {
         avroWriter.flush();
-        LOG.debug("Attempting to sync all data to filesystem");
+        LOG.info("Attempting to sync all data to filesystem");
         if (this.out instanceof HdfsDataOutputStream) {
             ((HdfsDataOutputStream) this.out).hsync(EnumSet.of(HdfsDataOutputStream.SyncFlag.UPDATE_LENGTH));
         } else {
@@ -145,7 +145,14 @@ public class AvroGenericRecordBolt extends AbstractHdfsBolt{
     @Override
     protected Path createOutputFile() throws IOException {
         Path path = new Path(this.fileNameFormat.getPath(), this.fileNameFormat.getName(this.rotation, System.currentTimeMillis()));
-        this.out = this.fs.create(path);
+        //判断是否存在
+        if(this.fs.exists(path)){
+            this.out = this.fs.append(path);
+            LOG.info("{} is exists! will to be append",path.getName());
+        }else {
+            LOG.info("{} is not exists! will to be create",path.getName());
+            this.out = this.fs.create(path);
+        }
 
         //Initialize writer
         DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<>(schema);

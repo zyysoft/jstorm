@@ -41,13 +41,16 @@ public class SimpleFileNameFormat implements FileNameFormat {
     @Override
     public String getName(long rotation, long timeStamp) {
         // compile parameters
-        SimpleDateFormat dateFormat = new SimpleDateFormat(timeFormat);
+        SimpleDateFormat timeFormat = new SimpleDateFormat(this.timeFormat);
+        SimpleDateFormat dateFormat = new SimpleDateFormat(this.dateFormat);
+
         String ret = name
-                .replace("$TIME", dateFormat.format(new Date(timeStamp)))
+                .replace("$TIME", timeFormat.format(new Date(timeStamp)))
                 .replace("$NUM", String.valueOf(rotation))
                 .replace("$HOST", host)
                 .replace("$COMPONENT", componentId)
-                .replace("$TASK", String.valueOf(taskId));
+                .replace("$TASK", String.valueOf(taskId))
+                .replace("$DATE",dateFormat.format(new Date(timeStamp)));
         return ret;
     }
     

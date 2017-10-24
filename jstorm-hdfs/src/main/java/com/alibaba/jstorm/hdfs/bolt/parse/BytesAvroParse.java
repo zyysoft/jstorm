@@ -46,7 +46,7 @@ public class BytesAvroParse implements TupleParse {
 				avroRecord.put(entry.getKey(),entry.getValue());
 				//解析数据类型
 				for(Schema sa:schema.getField(entry.getKey()).schema().getTypes()){
-					LOG.info("{}:{}",entry.getKey(),sa.getType().getName());
+					//LOG.info("{}:{}",entry.getKey(),sa.getType().getName());
 					String type=sa.getType().getName();
 					if("long".equalsIgnoreCase(type)){
 						avroRecord.put(entry.getKey(),jsonObject.getLongValue(entry.getKey()));
@@ -56,7 +56,7 @@ public class BytesAvroParse implements TupleParse {
 					}
 				}
 			}
-			LOG.info("tuple:{},avro:{}",jsonObject,avroRecord);
+			//LOG.info("avro:{}",avroRecord);
 //			while (it.hasNext()) {
 //				String key = (String) it.next();
 //				if(fields.contains(key)) {
