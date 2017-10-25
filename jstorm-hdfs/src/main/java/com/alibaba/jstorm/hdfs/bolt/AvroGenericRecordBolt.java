@@ -28,6 +28,8 @@ import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
+import org.apache.avro.mapred.FsInput;
+import org.apache.hadoop.fs.AvroFSInput;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -126,7 +128,7 @@ public class AvroGenericRecordBolt extends AbstractHdfsBolt{
     @Override
     protected void syncTuples() throws IOException {
         avroWriter.flush();
-        LOG.info("Attempting to sync all data to filesystem");
+        LOG.info("Attempting to sync all data to filesystem,total :{}",tupleBatch.size());
         if (this.out instanceof HdfsDataOutputStream) {
             ((HdfsDataOutputStream) this.out).hsync(EnumSet.of(HdfsDataOutputStream.SyncFlag.UPDATE_LENGTH));
         } else {
@@ -144,20 +146,22 @@ public class AvroGenericRecordBolt extends AbstractHdfsBolt{
 
     @Override
     protected Path createOutputFile() throws IOException {
-        Path path = new Path(this.fileNameFormat.getPath(), this.fileNameFormat.getName(this.rotation, System.currentTimeMillis()));
+        String fileParent=this.fileNameFormat.getPath();
+        String fileName = this.fileNameFormat.getName(this.rotation, System.currentTimeMillis());
+        Path path = new Path(fileParent,fileName);
         //判断是否存在
-        if(this.fs.exists(path)){
-            this.out = this.fs.append(path);
-            LOG.info("{} is exists! will to be append",path.getName());
-        }else {
-            LOG.info("{} is not exists! will to be create",path.getName());
-            this.out = this.fs.create(path);
-        }
-
         //Initialize writer
         DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<>(schema);
         avroWriter = new DataFileWriter<>(datumWriter);
-        avroWriter.create(this.schema, this.out);
+        if(this.fs.exists(path)){
+            LOG.info("{} is exists! will to be append",path.getName());
+            this.out = this.fs.append(path);
+            avroWriter.appendTo(new FsInput(path,this.fs), this.out);
+        }else {
+            LOG.info("{} is not exists! will to be create",path.getName());
+            this.out = this.fs.create(path);
+            avroWriter.create(this.schema, this.out);
+        }
 
         return path;
     }

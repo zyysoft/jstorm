@@ -66,7 +66,7 @@ public abstract class AbstractHdfsBolt extends BaseRichBolt {
     protected String configKey;
     protected transient Object writeLock;
     protected transient Timer rotationTimer; // only used for TimedRotationPolicy
-    private List<Tuple> tupleBatch = new LinkedList<>();
+    protected List<Tuple> tupleBatch = new LinkedList<>();
     protected long offset = 0;
     protected Integer fileRetryCount = DEFAULT_RETRY_COUNT;
     protected Integer tickTupleInterval = DEFAULT_TICK_TUPLE_INTERVAL_SECS;
@@ -150,7 +150,7 @@ public abstract class AbstractHdfsBolt extends BaseRichBolt {
         synchronized (this.writeLock) {
             boolean forceSync = false;
             if (TupleUtils.isTick(tuple)) {
-                LOG.info("TICK! forcing a file system flush");
+                LOG.info("TICK! forcing a file system flush,total:{}",tupleBatch.size());
                 this.collector.ack(tuple);
                 forceSync = true;
             } else {
@@ -253,4 +253,21 @@ public abstract class AbstractHdfsBolt extends BaseRichBolt {
     abstract protected Path createOutputFile() throws IOException;
 
     abstract protected void doPrepare(Map conf, TopologyContext topologyContext, OutputCollector collector) throws IOException;
+
+    @Override
+    public void cleanup() {
+        LOG.info("************** to cleanup***********");
+        synchronized (this.writeLock) {
+            try {
+                syncTuples();
+            } catch (IOException e) {
+                LOG.error("{}",e);
+            }
+            try {
+                closeOutputFile();
+            } catch (IOException e) {
+                LOG.error("{}",e);
+            }
+        }
+    }
 }

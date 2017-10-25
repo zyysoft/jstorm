@@ -19,6 +19,7 @@ package com.alibaba.jstorm.hdfs.bolt.sync;
 
 
 import backtype.storm.tuple.Tuple;
+import backtype.storm.utils.TupleUtils;
 
 /**
  * SyncPolicy implementation that will trigger a
@@ -35,7 +36,10 @@ public class CountSyncPolicy implements SyncPolicy {
 
     @Override
     public boolean mark(Tuple tuple, long offset) {
-        this.executeCount++;
+        //系统tuple不计入内，避免刷空数据
+        if(!TupleUtils.isTick(tuple)){
+            this.executeCount++;
+        }
         return this.executeCount >= this.count;
     }
 

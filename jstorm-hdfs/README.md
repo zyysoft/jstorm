@@ -9,4 +9,5 @@ mvn deploy:deploy-file -DgroupId=com.alibaba.jstorm -DartifactId=jstorm-hdfs -Dv
 ## TODO
 ```dtd
     1、avro 支持schem默认值
+    2、如果field是schema没有的，avro插入的时候报NullPointerException
 ```

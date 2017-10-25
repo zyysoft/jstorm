@@ -68,7 +68,7 @@ public class BytesAvroParse implements TupleParse {
 //			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			LOG.error("{},{}", tuple.getValue(0), e);
+			LOG.error("{},{}", messages, e);
 			throw new IOException(e.getMessage());
 		}
 		return avroRecord;
