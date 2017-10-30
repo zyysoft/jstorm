@@ -272,7 +272,8 @@
     <repository>
       <id>nexus</id>
       <name>local private nexus</name>
-      <url>http://maven.oschina.net/content/groups/public/</url>
+      <!--<url>http://maven.oschina.net/content/groups/public/</url> -->
+      <url>http://maven.aliyun.com/nexus/content/groups/public</url>
       <releases>
         <enabled>true</enabled>
       </releases>
