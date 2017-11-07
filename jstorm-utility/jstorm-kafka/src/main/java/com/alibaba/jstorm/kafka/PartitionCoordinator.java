@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import backtype.storm.task.TopologyContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sun.rmi.runtime.Log;
 
 public class PartitionCoordinator {
 	private KafkaSpoutConfig config;
@@ -24,6 +27,9 @@ public class PartitionCoordinator {
 	    partitionConsumerMap = new HashMap<Integer, PartitionConsumer>();
         int taskSize = context.getComponentTasks(context.getThisComponentId()).size();
         for(int i=context.getThisTaskIndex(); i<config.numPartitions; i+=taskSize) {
+			System.out.println("componentid:["+context.getThisComponentId()+"],total task Size:["+taskSize+"],taskId:["
+					+context.getThisTaskId()+"],task index["+i+"],topic partition:["+i+"]");
+
             PartitionConsumer partitionConsumer = new PartitionConsumer(conf, config, i, zkState);
             partitionConsumers.add(partitionConsumer);
             partitionConsumerMap.put(i, partitionConsumer);
