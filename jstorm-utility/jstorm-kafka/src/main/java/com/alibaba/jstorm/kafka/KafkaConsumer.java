@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import kafka.common.NotLeaderForPartitionException;
 import org.apache.log4j.Logger;
 
 import kafka.api.FetchRequest;
@@ -62,7 +63,7 @@ public class KafkaConsumer {
         FetchResponse fetchResponse = null;
         SimpleConsumer simpleConsumer = null;
         try {
-            simpleConsumer = findLeaderConsumer(partition);
+            simpleConsumer = findLeaderConsumer(partition,false);
             if (simpleConsumer == null) {
                 // LOG.error(message);
                 return null;
@@ -88,10 +89,17 @@ public class KafkaConsumer {
             if (code == ErrorMapping.OffsetOutOfRangeCode() && config.resetOffsetIfOutOfRange) {
                 long startOffset = getOffset(topic, partition, config.startOffsetTime);
                 offset = startOffset;
+                LOG.error("fetch data from kafka topic[" + config.topic + "] host[" + leaderBroker.host() + ":" + leaderBroker.port() + "] partition["
+                        + partition + "] errorCode[" + code+"] message["+fetchResponse.error(topic,partition).message()+"]");
             }
             if(leaderBroker != null) {
                 LOG.error("fetch data from kafka topic[" + config.topic + "] host[" + leaderBroker.host() + ":" + leaderBroker.port() + "] partition["
-                    + partition + "] error:" + code);
+                    + partition + "] errorCode[" + code+"] message["+fetchResponse.error(topic,partition).message()+"]");
+                //如果leader不可用
+                if(code==ErrorMapping.NotLeaderForPartitionCode()){
+                    LOG.info("Not Leader,reget leader forced....");
+                    findLeaderConsumer(partition,true);
+                }
             }else {
                 
             }
@@ -102,8 +110,14 @@ public class KafkaConsumer {
         }
     }
 
-    private SimpleConsumer findLeaderConsumer(int partition) {
+    private SimpleConsumer findLeaderConsumer(int partition,Boolean forced) {
         try {
+            if(forced){
+                if(consumer!=null){
+                    consumer.close();
+                    consumer=null;
+                }
+            }
             if (consumer != null) {
                 return consumer;
             }
@@ -191,7 +205,7 @@ public class KafkaConsumer {
     }
 
     public long getOffset(String topic, int partition, long startOffsetTime) {
-        SimpleConsumer simpleConsumer = findLeaderConsumer(partition);
+        SimpleConsumer simpleConsumer = findLeaderConsumer(partition,false);
 
         if (simpleConsumer == null) {
             LOG.error("Error consumer is null get offset from partition:" + partition);

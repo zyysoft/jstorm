@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import kafka.common.NotLeaderForPartitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,9 +128,8 @@ public class PartitionConsumer {
         try {
             long start = System.currentTimeMillis();
             msgs = consumer.fetchMessages(partition, emittingOffset + 1);
-            
             if (msgs == null) {
-                LOG.debug("fetch null message from offset {}", emittingOffset);
+                LOG.error("fetch null message from offset {} partition {}", emittingOffset,partition);
                 return;
             }
             
