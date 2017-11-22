@@ -166,6 +166,10 @@ public class PartitionConsumer {
                 data.put("topic", config.topic);
                 zkState.writeJSON(zkPath(), data);
                 lastCommittedOffset = lastOffset;
+            }else{
+                LOG.info("no needs to commit,position:"+partition+",lastOffset:"+lastOffset+
+                        ",emit size:"+emittingMessages.size()+",emittingOffset:"+emittingOffset+
+                ",pendingOffsets size:"+pendingOffsets.size());
             }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);

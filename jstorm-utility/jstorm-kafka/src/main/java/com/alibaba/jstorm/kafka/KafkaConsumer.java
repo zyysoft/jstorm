@@ -97,7 +97,7 @@ public class KafkaConsumer {
                     + partition + "] errorCode[" + code+"] message["+fetchResponse.error(topic,partition).message()+"]");
                 //如果leader不可用
                 if(code==ErrorMapping.NotLeaderForPartitionCode()){
-                    LOG.info("Not Leader,reget leader forced....");
+                    LOG.info("Not Leader,reget leader forced,partition["+partition+"]");
                     findLeaderConsumer(partition,true);
                 }
             }else {
