@@ -10,4 +10,5 @@ mvn deploy:deploy-file -DgroupId=com.alibaba.jstorm -DartifactId=jstorm-hdfs -Dv
 ```dtd
     1、avro 支持schem默认值
     2、如果field是schema没有的，avro插入的时候报NullPointerException
+    3、文件写入机制，只写入一个文件，这样可能会导致今天的数据写入到昨天的文件里。
 ```
