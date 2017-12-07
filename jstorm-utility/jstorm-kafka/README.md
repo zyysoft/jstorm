@@ -6,6 +6,12 @@
     fetch data from kafka topic[api_log] host[BI-HD12:9092] partition[4] error:6 message[This server is not the leader for that topic-partition.]
 * 4、position失效问题，因为历史原因zk里有offset，然后topology重新跑时，这个offset已经删掉
     The requested offset is not within the range of offsets maintained by the server
+* 5、如果一个消息在下游bolt处理失败，不会触发ack，即该offset不会从pendingOffsets删除，这样每次pendingOffsets.first()时，拿的都是
+     同一个offset，导致offset不会写入到zk。而consumer还是在继续从kafka poll数据
+* 6、为什么pendingOffsets会有空指针问题？
+* 7、为什么会有offset没有ack的情况，好像不是Failed的问题。
+* 8、为什么会有offset一会之前的，一会之后的？
+* 9、kafka.fetch.from.beginning逻辑修改
 ### Build
 ---
 ```

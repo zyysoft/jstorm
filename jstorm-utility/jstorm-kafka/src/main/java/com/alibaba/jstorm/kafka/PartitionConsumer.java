@@ -49,6 +49,7 @@ public class PartitionConsumer {
     private long lastCommittedOffset;
     private ZkState zkState;
     private Map stormConf;
+    private Integer ack=0;
 
     public PartitionConsumer(Map conf, KafkaSpoutConfig config, int partition, ZkState offsetState) {
         this.stormConf = conf;
@@ -69,16 +70,20 @@ public class PartitionConsumer {
         }
 
         try {
-            if (config.fromBeginning) {
-                emittingOffset = consumer.getOffset(config.topic, partition, kafka.api.OffsetRequest.EarliestTime());
-            } else {
-                if (jsonOffset == null) {
-                    lastCommittedOffset = consumer.getOffset(config.topic, partition, kafka.api.OffsetRequest.LatestTime());
+            if(jsonOffset!=null){
+                lastCommittedOffset = jsonOffset;
+                emittingOffset = lastCommittedOffset; //开始fetch的offset
+            }else{
+                //从partition的开始offset
+                if (config.fromBeginning) {
+                    emittingOffset = consumer.getOffset(config.topic, partition, kafka.api.OffsetRequest.EarliestTime())
+                        -1;//fetch时会把 emittingOffset+1
                 } else {
-                    lastCommittedOffset = jsonOffset;
+                    //lastCommittedOffset = consumer.getOffset(config.topic, partition, kafka.api.OffsetRequest.LatestTime());
+                    emittingOffset=consumer.getOffset(config.topic, partition, kafka.api.OffsetRequest.LatestTime());
                 }
-                emittingOffset = lastCommittedOffset;
             }
+            LOG.info("fetch from :{},lastCommittedOffset:{}",emittingOffset,lastCommittedOffset);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
@@ -91,7 +96,7 @@ public class PartitionConsumer {
 
         int count = 0;
         while (true) {
-            MessageAndOffset toEmitMsg = emittingMessages.pollFirst();
+            MessageAndOffset toEmitMsg = emittingMessages.pollFirst();//待emit的消息列表
             if (toEmitMsg == null) {
                 return EmitState.EMIT_END;
             }
@@ -125,27 +130,31 @@ public class PartitionConsumer {
     private void fillMessages() {
 
         ByteBufferMessageSet msgs;
+        int step=0;
         try {
             long start = System.currentTimeMillis();
             msgs = consumer.fetchMessages(partition, emittingOffset + 1);
             if (msgs == null) {
                 LOG.error("fetch null message from offset {} partition {}", emittingOffset,partition);
+                // 线程休眠
+                // Thread.sleep(500);
                 return;
             }
-            
-            int count = 0;
             for (MessageAndOffset msg : msgs) {
-                count += 1;
+                step=1;
                 emittingMessages.add(msg);
+                step=2;
                 emittingOffset = msg.offset();
-                pendingOffsets.add(emittingOffset);
-                LOG.debug("fillmessage fetched a message:{}, offset:{}", msg.message().toString(), msg.offset());
+                step=3;
+                pendingOffsets.add(emittingOffset); //可能会空指针
+                step=4;
+                //LOG.debug("fillmessage fetched a message:{}, offset:{}", msg.message().toString(), msg.offset());
             }
-            long end = System.currentTimeMillis();
-            LOG.debug("fetch message from partition:"+partition+", offset:" + emittingOffset+", size:"+msgs.sizeInBytes()+", count:"+count +", time:"+(end-start));
+            //long end = System.currentTimeMillis();
+            //LOG.debug("fetch message from partition:"+partition+", offset:" + emittingOffset+", size:"+msgs.sizeInBytes()+", count:"+count +", time:"+(end-start));
         } catch (Exception e) {
             e.printStackTrace();
-            LOG.error(e.getMessage(),e);
+            LOG.error(e.getMessage()+",error step:"+step+",emittingOffset:"+emittingOffset,e);
         }
     }
 
@@ -153,9 +162,9 @@ public class PartitionConsumer {
         try {
             long lastOffset = 0;
             if (pendingOffsets.isEmpty() || pendingOffsets.size() <= 0) {
-                lastOffset = emittingOffset;
+                lastOffset = emittingOffset;//当前poll的offset
             } else {
-                lastOffset = pendingOffsets.first();
+                lastOffset = pendingOffsets.first();//可能会空指针。从kafka拉取的offset放到这个缓存，ack时会删掉。但如果一个offset在bolt中处理失败，那么就不会ack，会导致这个offset一直在pendingOffsets列表中
             }
             if (lastOffset != lastCommittedOffset) {
                 Map<Object, Object> data = new HashMap<Object, Object>();
@@ -165,11 +174,11 @@ public class PartitionConsumer {
                 data.put("broker", ImmutableMap.of("host", consumer.getLeaderBroker().host(), "port", consumer.getLeaderBroker().port()));
                 data.put("topic", config.topic);
                 zkState.writeJSON(zkPath(), data);
-                lastCommittedOffset = lastOffset;
+                lastCommittedOffset = lastOffset;//最后一次提交的offset
             }else{
                 LOG.info("no needs to commit,position:"+partition+",lastOffset:"+lastOffset+
                         ",emit size:"+emittingMessages.size()+",emittingOffset:"+emittingOffset+
-                ",pendingOffsets size:"+pendingOffsets.size());
+                ",pendingOffsets size:"+pendingOffsets.size()+",first pendingOffset:"+(pendingOffsets.size()>=1?pendingOffsets.first():"")+",total acks:"+ack);
             }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
@@ -179,14 +188,27 @@ public class PartitionConsumer {
 
     public void ack(long offset) {
         try {
+            ack++;
             pendingOffsets.remove(offset);
         } catch (Exception e) {
             LOG.error("offset ack error " + offset);
         }
     }
 
+    
+    /**
+    * class_name: PartitionConsumer
+    * package: com.alibaba.jstorm.kafka
+    * describe: TODO 如果fail，这个offset可能一直在pendingOffsets中
+    * create_user: zhaoyaoyuan
+    * create_date: 2017/11/30
+    * create_time: 下午7:48
+    **/
     public void fail(long offset) {
-        failedOffsets.remove(offset);
+        LOG.error("offset failed {}",offset);
+        //failedOffsets.remove(offset);
+        failedOffsets.add(offset);
+        pendingOffsets.remove(offset);
     }
 
     public void close() {
