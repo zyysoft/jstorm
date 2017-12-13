@@ -8,7 +8,7 @@
     The requested offset is not within the range of offsets maintained by the server
 * 5、如果一个消息在下游bolt处理失败，不会触发ack，即该offset不会从pendingOffsets删除，这样每次pendingOffsets.first()时，拿的都是
      同一个offset，导致offset不会写入到zk。而consumer还是在继续从kafka poll数据
-* 6、为什么pendingOffsets会有空指针问题？
+* 6、修复pendingOffsets偶尔出现空指针问题
 * 7、为什么会有offset没有ack的情况，好像不是Failed的问题。
 * 8、为什么会有offset一会之前的，一会之后的？
 * 9、kafka.fetch.from.beginning逻辑修改
@@ -16,5 +16,5 @@
 ---
 ```
 1、 mvn deploy:deploy-file -DgroupId=com.alibaba.jstorm -DartifactId=jstorm-kafka -Dversion=2.2.1 -Dfile=target/jstorm-kafka-2.2.1.jar -Dsources=target/jstorm-kafka-2.2.1-sources.jar -Durl=http://dev-bi-cdh07:8081/repository/bi-nexus/ -DrepositoryId=bi-nexus
-2、 mvn clean package -DskipTests
+2、 mvn clean package install -DskipTests
 ```

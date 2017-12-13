@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 
-import kafka.common.NotLeaderForPartitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ public class PartitionConsumer {
 
     private KafkaSpoutConfig config;
     private LinkedList<MessageAndOffset> emittingMessages = new LinkedList<MessageAndOffset>();
-    private SortedSet<Long> pendingOffsets = new TreeSet<Long>();
+    private volatile SortedSet<Long> pendingOffsets = new ConcurrentSkipListSet<Long>();
     private SortedSet<Long> failedOffsets = new TreeSet<Long>();
     private long emittingOffset;
     private long lastCommittedOffset;
@@ -199,16 +199,16 @@ public class PartitionConsumer {
     /**
     * class_name: PartitionConsumer
     * package: com.alibaba.jstorm.kafka
-    * describe: TODO 如果fail，这个offset可能一直在pendingOffsets中
+    * describe: TODO 如果fail，这个offset可能一直在pendingOffsets中，
     * create_user: zhaoyaoyuan
     * create_date: 2017/11/30
     * create_time: 下午7:48
     **/
     public void fail(long offset) {
-        LOG.error("offset failed {}",offset);
+        LOG.error("offset failed ,partition:{},offset:{}",partition,offset);
         //failedOffsets.remove(offset);
         failedOffsets.add(offset);
-        pendingOffsets.remove(offset);
+        //pendingOffsets.remove(offset);
     }
 
     public void close() {
