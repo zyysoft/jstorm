@@ -35,7 +35,7 @@ public class BytesAvroParse implements TupleParse {
 //		for(Field field:fieldList) {
 //			avroRecord.put(field.name(),null);
 //		}
-		avroRecord.put("match",true);
+		//avroRecord.put("match",true);
 
 		String messages = null;
 		try {
