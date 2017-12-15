@@ -9,6 +9,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.GenericRecordBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,20 +23,14 @@ import backtype.storm.tuple.TupleImplExt;
  */
 public class BytesAvroParse implements TupleParse {
 	private static final Logger LOG = LoggerFactory.getLogger(BytesAvroParse.class);
-	
+
 	/**
 	 * String转换成Avro
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	@Override
 	public GenericRecord tupleToRecode(Tuple tuple,Schema schema) throws IOException {
-		GenericRecord avroRecord = new GenericData.Record(schema);
-
-		List<Field> fieldList = schema.getFields();
-//		for(Field field:fieldList) {
-//			avroRecord.put(field.name(),null);
-//		}
-		//avroRecord.put("match",true);
+		GenericRecord avroRecord = new GenericRecordBuilder(schema).build();
 
 		String messages = null;
 		try {
@@ -43,17 +38,30 @@ public class BytesAvroParse implements TupleParse {
 
 			JSONObject jsonObject = JSONObject.parseObject(messages);
 			for(Map.Entry<String,Object> entry:jsonObject.entrySet()){
-				avroRecord.put(entry.getKey(),entry.getValue());
-				//解析数据类型
+				Boolean typeTrans=false;
+				/**
+				 *1、字段必须是 union类型，因为用的是getTypes方法
+				 * 2、如果不是union类型，用getType方法
+				 */
 				for(Schema sa:schema.getField(entry.getKey()).schema().getTypes()){
-					//LOG.info("{}:{}",entry.getKey(),sa.getType().getName());
 					String type=sa.getType().getName();
 					if("long".equalsIgnoreCase(type)){
 						avroRecord.put(entry.getKey(),jsonObject.getLongValue(entry.getKey()));
+						typeTrans=true;
+						break;
 					}else if("map".equalsIgnoreCase(type)){
 						JSONObject mapObj = jsonObject.getJSONObject(entry.getKey());
 						avroRecord.put(entry.getKey(),mapObj);
+						typeTrans=true;
+						break;
+					}else if("boolean".equalsIgnoreCase(type)){
+						avroRecord.put(entry.getKey(),jsonObject.getBoolean(entry.getKey()));
+						typeTrans=true;
+						break;
 					}
+				}
+				if(!typeTrans){
+					avroRecord.put(entry.getKey(),entry.getValue());
 				}
 			}
 			//LOG.info("avro:{}",avroRecord);
@@ -69,7 +77,7 @@ public class BytesAvroParse implements TupleParse {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			LOG.error("{},{}", messages, e);
-			throw new IOException(e.getMessage());
+			throw e;
 		}
 		return avroRecord;
 	}

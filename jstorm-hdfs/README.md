@@ -9,7 +9,8 @@
 ```
 ## TODO
 ```dtd
-    1、avro 支持schem默认值
+    1、avro 不支持fields中的默认值 (GenericRecordBuilder可以创建有默认值的GenericRecord)
+        avro中的字段类型必须是union类型的，default和第一个类型相匹配
     2、如果field是schema没有的，avro插入的时候报NullPointerException
     3、文件写入机制，只写入一个文件，这样可能会导致今天的数据写入到昨天的文件里。
 ```

@@ -157,9 +157,9 @@ public abstract class AbstractHdfsBolt extends BaseRichBolt {
                 try {
                     writeTuple(tuple);
                     tupleBatch.add(tuple);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     //If the write failed, try to sync anything already written
-                    LOG.info("Tuple failed to write, forcing a flush of existing data.");
+                    LOG.error("Tuple failed to write, forcing a flush of existing data.");
                     this.collector.reportError(e);
                     forceSync = true;
                     this.collector.fail(tuple);
