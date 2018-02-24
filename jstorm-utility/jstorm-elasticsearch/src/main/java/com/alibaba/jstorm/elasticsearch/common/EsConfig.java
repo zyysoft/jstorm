@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 
 import com.google.common.base.Preconditions;
@@ -59,7 +58,7 @@ public class EsConfig implements Serializable {
           "Incorrect node format");
       String host = hostAndPort[0];
       int port = Integer.parseInt(hostAndPort[1]);
-      InetSocketTransportAddress inetSocketTransportAddress = new InetSocketTransportAddress(
+      TransportAddress inetSocketTransportAddress = new TransportAddress(
           InetAddress.getByName(host), port);
       transportAddresses.add(inetSocketTransportAddress);
     }

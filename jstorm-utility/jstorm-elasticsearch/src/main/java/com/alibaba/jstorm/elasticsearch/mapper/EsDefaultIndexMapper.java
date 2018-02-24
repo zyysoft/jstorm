@@ -1,16 +1,15 @@
 package com.alibaba.jstorm.elasticsearch.mapper;
 
-import org.elasticsearch.action.index.IndexRequest.OpType;
-
 import backtype.storm.tuple.ITuple;
+import org.elasticsearch.action.DocWriteRequest;
 
-public class EsDefaultIndexMapper implements EsIndexMapper {
+public class EsDefaultIndexMapper implements EsIndexMapper<String> {
 
   private static final long serialVersionUID = 3777594656114668825L;
 
   @Override
-  public OpType getOpType() {
-    return OpType.INDEX;
+  public DocWriteRequest.OpType getOpType() {
+    return DocWriteRequest.OpType.INDEX;
   }
 
   @Override

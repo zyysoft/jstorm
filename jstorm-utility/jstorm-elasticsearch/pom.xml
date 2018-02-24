@@ -24,7 +24,6 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jstorm.version>2.2.1</jstorm.version>
-    <kafka.version>0.8.1</kafka.version>
   </properties>
 
   <dependencies>
@@ -39,7 +38,8 @@
     <dependency>
       <groupId>org.elasticsearch.client</groupId>
       <artifactId>transport</artifactId>
-      <version>5.1.1</version>
+      <!--<version>5.1.1</version>-->
+      <version>6.0.0</version>
     </dependency>
 
     <dependency>
