@@ -45,6 +45,14 @@ public abstract class EsAbstractBolt extends BaseRichBolt {
   @Override
   public abstract void execute(Tuple tuple);
 
+  @Override
+  public void cleanup() {
+    super.cleanup();
+    if(client!=null){
+      client.close();
+    }
+  }
+
   static Client getClient() {
     return EsAbstractBolt.client;
   }

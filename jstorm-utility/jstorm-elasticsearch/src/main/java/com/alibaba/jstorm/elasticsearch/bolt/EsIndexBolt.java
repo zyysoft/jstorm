@@ -36,8 +36,13 @@ public class EsIndexBolt extends EsAbstractBolt {
               client.prepareIndex(index, type).setId(id).setSource((String)mapper.getSource(tuple))
                       .setOpType(opType).execute();
           }else if(mapper.getSource(tuple) instanceof Map){
-              client.prepareIndex(index, type).setId(id).setSource((Map)mapper.getSource(tuple))
-                      .setOpType(opType).execute();
+              Map source = (Map)mapper.getSource(tuple);
+              if("DELETE".equalsIgnoreCase((String) source.get("Elastic_OpType"))){
+                  opType=DocWriteRequest.OpType.DELETE;
+              }
+              if(source.containsKey("Elastic_OpType")){
+                  source.remove("Elastic_OpType");
+              }
           }
           collector.ack(tuple);
       }
