@@ -6,7 +6,8 @@ import backtype.storm.tuple.Tuple;
 import backtype.storm.utils.TupleHelpers;
 import com.alibaba.jstorm.elasticsearch.common.EsConfig;
 import com.alibaba.jstorm.elasticsearch.mapper.EsIndexMapper;
-import org.elasticsearch.action.DocWriteRequest;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.update.UpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,21 +32,23 @@ public class EsIndexBolt extends EsAbstractBolt {
           String index = mapper.getIndex(tuple);
           String type = mapper.getType(tuple);
           String id = mapper.getId(tuple);
-          DocWriteRequest.OpType opType = mapper.getOpType();
-          if(mapper.getSource(tuple) instanceof  String){
-              client.prepareIndex(index, type).setId(id).setSource((String)mapper.getSource(tuple))
-                      .setOpType(opType).execute();
-          }else if(mapper.getSource(tuple) instanceof Map){
+          if(mapper.getSource(tuple) instanceof Map){
               Map source = (Map)mapper.getSource(tuple);
-              if("DELETE".equalsIgnoreCase((String) source.get("Elastic_OpType"))){
-                  opType=DocWriteRequest.OpType.DELETE;
-              }
-              if(source.containsKey("Elastic_OpType")){
-                  source.remove("Elastic_OpType");
+              String opt = (String) source.get("Elastic_OpType");
+              source.remove("Elastic_OpType");
+              if("DELETE".equalsIgnoreCase(opt)){
+                  client.prepareDelete(index, type,id).execute().get();
+              }else {
+                  IndexRequest indexReq = new IndexRequest(index,type,id)
+                          .source(source);
+                  UpdateRequest updateReq = new UpdateRequest(index, type, id)
+                          .doc(source)
+                          .upsert(indexReq);
+                  client.update(updateReq).get();
               }
           }
-          collector.ack(tuple);
       }
+      collector.ack(tuple);
     } catch (Exception e) {
         LOG.error("{}",e);
       collector.fail(tuple);
