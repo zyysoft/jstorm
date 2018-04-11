@@ -44,7 +44,8 @@ public class PartitionConsumer {
     private KafkaSpoutConfig config;
     private LinkedList<MessageAndOffset> emittingMessages = new LinkedList<MessageAndOffset>();
     private volatile SortedSet<Long> pendingOffsets = new ConcurrentSkipListSet<Long>();
-    private SortedSet<Long> failedOffsets = new TreeSet<Long>();
+    private SortedSet<Long> failedOffsets = new ConcurrentSkipListSet<Long>();
+
     private long emittingOffset;
     private long lastCommittedOffset;
     private ZkState zkState;
@@ -130,10 +131,14 @@ public class PartitionConsumer {
     private void fillMessages() {
 
         ByteBufferMessageSet msgs;
-        int step=0;
         try {
-            long start = System.currentTimeMillis();
-            msgs = consumer.fetchMessages(partition, emittingOffset + 1);
+            if(! failedOffsets.isEmpty()){
+                LOG.info("fetch message from last failed offset ,partition :{},offset:{} ",partition, failedOffsets.first());
+                msgs = consumer.fetchMessages(partition, failedOffsets.first());
+            }else{
+                msgs = consumer.fetchMessages(partition, emittingOffset + 1);
+            }
+
             if (msgs == null) {
                 LOG.error("fetch null message from offset {} partition {}", emittingOffset,partition);
                 // 线程休眠
@@ -141,20 +146,16 @@ public class PartitionConsumer {
                 return;
             }
             for (MessageAndOffset msg : msgs) {
-                step=1;
                 emittingMessages.add(msg);
-                step=2;
                 emittingOffset = msg.offset();
-                step=3;
                 pendingOffsets.add(emittingOffset); //可能会空指针
-                step=4;
                 //LOG.debug("fillmessage fetched a message:{}, offset:{}", msg.message().toString(), msg.offset());
             }
             //long end = System.currentTimeMillis();
             //LOG.debug("fetch message from partition:"+partition+", offset:" + emittingOffset+", size:"+msgs.sizeInBytes()+", count:"+count +", time:"+(end-start));
         } catch (Exception e) {
             e.printStackTrace();
-            LOG.error(e.getMessage()+",error step:"+step+",emittingOffset:"+emittingOffset,e);
+            LOG.error(e.getMessage()+",emittingOffset:"+emittingOffset,e);
         }
     }
 
@@ -189,6 +190,7 @@ public class PartitionConsumer {
     public void ack(long offset) {
         try {
             ack++;
+            failedOffsets.remove(offset);
             pendingOffsets.remove(offset);
         } catch (Exception e) {
             LOG.error("offset ack error " + offset);
@@ -208,7 +210,6 @@ public class PartitionConsumer {
         LOG.error("offset failed ,partition:{},offset:{}",partition,offset);
         //failedOffsets.remove(offset);
         failedOffsets.add(offset);
-        //pendingOffsets.remove(offset);
     }
 
     public void close() {
