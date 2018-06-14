@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
@@ -74,6 +75,8 @@ public class BytesAvroParse implements TupleParse {
 //					LOG.debug("{} not in schema,{}", key,messages);
 //				}
 //			}
+		}catch (JSONException e){
+			return null;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			LOG.error("{},{}", messages, e);

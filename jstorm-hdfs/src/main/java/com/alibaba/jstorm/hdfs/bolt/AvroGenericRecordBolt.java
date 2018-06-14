@@ -120,9 +120,10 @@ public class AvroGenericRecordBolt extends AbstractHdfsBolt{
 //        }catch (Exception e){
 //            avroRecord.put("match",false);
 //        }
-
-        avroWriter.append(avroRecord);
-        offset = this.out.getPos();
+        if(avroRecord!=null){
+            avroWriter.append(avroRecord);
+            offset = this.out.getPos();
+        }
     }
     
     @Override

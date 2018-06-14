@@ -9,3 +9,4 @@ target
 *.iml
 jstorm-local/
 dependency-reduced-pom.xml
+*.DS_Store
