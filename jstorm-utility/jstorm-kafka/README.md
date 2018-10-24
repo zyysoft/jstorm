@@ -15,6 +15,6 @@
 ### Build
 ---
 ```
-1、 mvn deploy:deploy-file -DgroupId=com.alibaba.jstorm -DartifactId=jstorm-kafka -Dversion=2.2.1 -Dfile=target/jstorm-kafka-2.2.1.jar -Dsources=target/jstorm-kafka-2.2.1-sources.jar -Durl=http://dev-bi-cdh07:8081/repository/bi-nexus/ -DrepositoryId=bi-nexus
+1、 mvn package deploy:deploy-file -DgroupId=com.alibaba.jstorm -DartifactId=jstorm-kafka -Dversion=2.2.1 -Dfile=target/jstorm-kafka-2.2.1.jar -Dsources=target/jstorm-kafka-2.2.1-sources.jar -Durl=http://dev-bi-cdh07:8081/repository/bi-nexus/ -DrepositoryId=bi-nexus
 2、 mvn clean package install -DskipTests
 ```
