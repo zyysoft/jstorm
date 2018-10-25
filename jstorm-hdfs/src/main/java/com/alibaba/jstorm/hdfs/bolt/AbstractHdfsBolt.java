@@ -79,6 +79,8 @@ public abstract class AbstractHdfsBolt extends BaseRichBolt {
         LOG.info("Rotating output file...");
         long start = System.currentTimeMillis();
         synchronized (this.writeLock) {
+            LOG.info("Rotating output file begin...");
+            syncTuples();
             closeOutputFile();
             this.rotation++;
 
@@ -88,6 +90,7 @@ public abstract class AbstractHdfsBolt extends BaseRichBolt {
                 action.execute(this.fs, this.currentFile);
             }
             this.currentFile = newFile;
+            LOG.info("Rotating output file end...");
         }
         long time = System.currentTimeMillis() - start;
         LOG.info("File rotation took {} ms.", time);
@@ -136,7 +139,7 @@ public abstract class AbstractHdfsBolt extends BaseRichBolt {
                     try {
                         rotateOutputFile();
                     } catch(IOException e){
-                        LOG.warn("IOException during scheduled file rotation.", e);
+                        LOG.error("IOException during scheduled file rotation.", e);
                     }
                 }
             };
@@ -159,7 +162,8 @@ public abstract class AbstractHdfsBolt extends BaseRichBolt {
                     tupleBatch.add(tuple);
                 } catch (Exception e) {
                     //If the write failed, try to sync anything already written
-                    LOG.error("Tuple failed to write, forcing a flush of existing data.");
+                    LOG.error("Tuple failed to write, forcing a flush of existing data.",e);
+                    //会重启重新分配任务
                     this.collector.reportError(e);
                     forceSync = true;
                     this.collector.fail(tuple);
@@ -261,12 +265,12 @@ public abstract class AbstractHdfsBolt extends BaseRichBolt {
             try {
                 syncTuples();
             } catch (IOException e) {
-                LOG.error("{}",e);
+                LOG.error("failed to cleanup(syncTuples) {}",e);
             }
             try {
                 closeOutputFile();
             } catch (IOException e) {
-                LOG.error("{}",e);
+                LOG.error("failed to cleanup(closeOutputFile) {}",e);
             }
         }
     }
